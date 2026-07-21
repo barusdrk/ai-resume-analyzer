@@ -1,9 +1,11 @@
 interface ScoreCardProps {
   score: number;
+  title?: string;
 }
 
 export default function ScoreCard({
   score,
+  title = "Resume Match Score",
 }: ScoreCardProps) {
   let color = "text-red-600";
 
@@ -16,7 +18,7 @@ export default function ScoreCard({
   return (
     <div className="rounded-xl border bg-white p-6 shadow dark:border-gray-700 dark:bg-gray-900">
       <h2 className="mb-4 text-xl font-semibold">
-        Resume Match Score
+        {title}
       </h2>
 
       <div className="flex items-center justify-center">

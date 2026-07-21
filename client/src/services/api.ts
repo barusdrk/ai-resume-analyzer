@@ -6,6 +6,77 @@ const API = axios.create({
     "http://localhost:3001/api",
 });
 
+API.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  return config;
+});
+
+//
+// Authentication
+//
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+}
+
+export interface AuthResponse {
+  token: string;
+  user: User;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface RegisterRequest {
+  name: string;
+  email: string;
+  password: string;
+}
+
+export async function register(
+  data: RegisterRequest
+): Promise<AuthResponse> {
+  const response =
+    await API.post<AuthResponse>(
+      "/auth/register",
+      data
+    );
+
+  return response.data;
+}
+
+export async function login(
+  data: LoginRequest
+): Promise<AuthResponse> {
+  const response =
+    await API.post<AuthResponse>(
+      "/auth/login",
+      data
+    );
+
+  return response.data;
+}
+
+export async function getCurrentUser(): Promise<User> {
+  const response =
+    await API.get<User>("/auth/me");
+
+  return response.data;
+}
+
+//
+// Resume Analysis
+//
+
 export interface ResumeAnalysis {
   matchScore: number;
   atsScore: number;
@@ -38,6 +109,10 @@ export async function analyzeResume(
   return response.data;
 }
 
+//
+// Resume Upload
+//
+
 export async function uploadResume(
   file: File
 ): Promise<string> {
@@ -57,6 +132,10 @@ export async function uploadResume(
   return response.data.text;
 }
 
+//
+// Resume Rewrite
+//
+
 export interface RewriteResumeResponse {
   rewrittenResume: string;
 }
@@ -73,6 +152,10 @@ export async function rewriteResume(
   return response.data;
 }
 
+//
+// Cover Letter
+//
+
 export interface CoverLetterResponse {
   coverLetter: string;
 }
@@ -88,6 +171,10 @@ export async function generateCoverLetter(
 
   return response.data;
 }
+
+//
+// Interview Questions
+//
 
 export interface InterviewQuestion {
   category: string;
