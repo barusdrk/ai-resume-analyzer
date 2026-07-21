@@ -8,18 +8,17 @@ router.post("/", async (req, res) => {
   try {
     const { resume, jobTitle, jobDescription } = req.body;
 
-    if (!resume || !jobTitle || jobDescription) {
+    if (!resume || !jobTitle) {
       return res.status(400).json({
-        message:
-          "Resume and job title are required.",
+        message: "Resume and job title are required.",
       });
     }
 
-    const result = await analyzeResume(
+    const result = await analyzeResume({
       resume,
       jobTitle,
-      jobDescription
-    );
+      jobDescription,
+    });
 
     res.json(result);
   } catch (error) {

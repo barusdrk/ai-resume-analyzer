@@ -1,168 +1,153 @@
-import axios from "axios";
-
-const API = axios.create({
-  baseURL:
-    import.meta.env.VITE_API_URL ??
-    "http://localhost:3001/api",
-});
-
-API.interceptors.request.use(
-  (config) => {
-    const token =
-      localStorage.getItem("token");
-
-    if (token) {
-      config.headers.Authorization =
-        `Bearer ${token}`;
-    }
-
-    return config;
-  }
-);
-
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-}
-
-export interface AuthResponse {
-  token: string;
-  user: User;
-}
-
-export interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-export interface RegisterRequest {
-  name: string;
-  email: string;
-  password: string;
-}
-
 export interface AnalyzeRequest {
   resume: string;
   jobTitle: string;
-  jobDescription: string;
+  jobDescription?: string;
 }
 
-export async function register(
-  data: RegisterRequest
-) {
-  const response =
-    await API.post<AuthResponse>(
-      "/auth/register",
-      data
-    );
+export interface ResumeAnalysis {
+  matchScore: number;
+  atsScore: number;
+  keywordMatchScore: number;
 
-  return response.data;
+  strengths: string[];
+  missingSkills: string[];
+
+  matchedKeywords: string[];
+  missingKeywords: string[];
+
+  suggestions: string[];
+
+  rewrittenResume: string;
+
+  coverLetter: string;
+
+  interviewQuestions: {
+    category: string;
+    question: string;
+  }[];
 }
 
-export async function login(
-  data: LoginRequest
-) {
-  const response =
-    await API.post<AuthResponse>(
-      "/auth/login",
-      data
-    );
+export async function analyzeResume({
+  resume,
+  jobTitle,
+  jobDescription = "",
+}: AnalyzeRequest): Promise<ResumeAnalysis> {
+  const text =
+    `${resume}\n${jobDescription}`.toLowerCase();
 
-  return response.data;
-}
+  const keywords = [
+    "react",
+    "typescript",
+    "javascript",
+    "node",
+    "express",
+    "mongodb",
+    "sql",
+    "docker",
+    "aws",
+    "git",
+    "rest",
+    "api",
+    "html",
+    "css",
+    "tailwind",
+  ];
 
-export async function getCurrentUser() {
-  const response =
-    await API.get<User>("/auth/me");
+  const matchedKeywords = keywords.filter((keyword) =>
+    text.includes(keyword)
+  );
 
-  return response.data;
-}
+  const missingKeywords = keywords.filter(
+    (keyword) => !text.includes(keyword)
+  );
 
-export async function analyzeResume(
-  data: AnalyzeRequest
-) {
-  const response =
-    await API.post(
-      "/analyze",
-      data
-    );
+  const keywordMatchScore = Math.round(
+    (matchedKeywords.length / keywords.length) * 100
+  );
 
-  return response.data;
-}
+  const atsScore = Math.min(
+    100,
+    keywordMatchScore + 15
+  );
 
-export async function rewriteResume(
-  resume: string,
-  jobTitle: string,
-  jobDescription: string
-) {
-  const response =
-    await API.post("/rewrite", {
-      resume,
-      jobTitle,
-      jobDescription,
-    });
+  const matchScore = Math.round(
+    (keywordMatchScore + atsScore) / 2
+  );
 
-  return response.data;
-}
+  return {
+    matchScore,
 
-export async function generateCoverLetter(
-  resume: string,
-  jobTitle: string,
-  jobDescription: string
-) {
-  const response =
-    await API.post(
-      "/cover-letter",
+    atsScore,
+
+    keywordMatchScore,
+
+    strengths: matchedKeywords,
+
+    missingSkills: missingKeywords,
+
+    matchedKeywords,
+
+    missingKeywords,
+
+    suggestions: [
+      "Add measurable achievements.",
+      "Include more role-specific keywords.",
+      "Quantify project impact.",
+      "Use ATS-friendly section headings.",
+      "Tailor your resume to each job.",
+    ],
+
+    rewrittenResume: `Professional Summary
+
+Experienced ${jobTitle} with strong technical skills and a proven record of delivering high-quality software solutions.
+
+Skills
+
+${matchedKeywords.join(", ")}
+
+Experience
+
+• Built scalable web applications.
+• Collaborated with cross-functional teams.
+• Improved application performance and maintainability.`,
+
+    coverLetter: `Dear Hiring Manager,
+
+I am excited to apply for the ${jobTitle} position.
+
+My experience aligns well with your requirements, and I am confident that my technical background and passion for software development would allow me to contribute immediately.
+
+Thank you for your consideration.
+
+Sincerely,
+Candidate`,
+
+    interviewQuestions: [
       {
-        resume,
-        jobTitle,
-        jobDescription,
-      }
-    );
-
-  return response.data;
-}
-
-export async function generateInterviewQuestions(
-  resume: string,
-  jobTitle: string,
-  jobDescription: string
-) {
-  const response =
-    await API.post(
-      "/interview",
+        category: "Technical",
+        question:
+          "Describe a React project you built.",
+      },
       {
-        resume,
-        jobTitle,
-        jobDescription,
-      }
-    );
-
-  return response.data;
-}
-
-export async function uploadResume(
-  file: File
-) {
-  const formData =
-    new FormData();
-
-  formData.append("resume", file);
-
-  const response =
-    await API.post(
-      "/upload",
-      formData,
+        category: "Technical",
+        question:
+          "How do you optimize a React application?",
+      },
       {
-        headers: {
-          "Content-Type":
-            "multipart/form-data",
-        },
-      }
-    );
-
-  return response.data;
+        category: "Behavioral",
+        question:
+          "Tell me about a difficult bug you solved.",
+      },
+      {
+        category: "Behavioral",
+        question:
+          "Describe a time you worked in a team.",
+      },
+      {
+        category: "System Design",
+        question:
+          "How would you design a scalable REST API?",
+      },
+    ],
+  };
 }
-
-export default API;
