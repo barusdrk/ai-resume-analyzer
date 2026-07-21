@@ -4,65 +4,42 @@ export interface AnalyzeRequest {
   jobDescription?: string;
 }
 
-export interface ResumeAnalysis {
-  matchScore: number;
-  atsScore: number;
-  keywordMatchScore: number;
-
-  strengths: string[];
-  missingSkills: string[];
-
-  matchedKeywords: string[];
-  missingKeywords: string[];
-
-  suggestions: string[];
-
-  rewrittenResume: string;
-
-  coverLetter: string;
-
-  interviewQuestions: {
-    category: string;
-    question: string;
-  }[];
-}
+const KEYWORDS = [
+  "react",
+  "typescript",
+  "javascript",
+  "node",
+  "express",
+  "mongodb",
+  "sql",
+  "docker",
+  "aws",
+  "git",
+  "rest",
+  "api",
+  "html",
+  "css",
+  "tailwind",
+];
 
 export async function analyzeResume({
   resume,
   jobTitle,
   jobDescription = "",
-}: AnalyzeRequest): Promise<ResumeAnalysis> {
+}: AnalyzeRequest) {
   const text =
-    `${resume}\n${jobDescription}`.toLowerCase();
+    `${resume} ${jobDescription}`.toLowerCase();
 
-  const keywords = [
-    "react",
-    "typescript",
-    "javascript",
-    "node",
-    "express",
-    "mongodb",
-    "sql",
-    "docker",
-    "aws",
-    "git",
-    "rest",
-    "api",
-    "html",
-    "css",
-    "tailwind",
-  ];
-
-  const matchedKeywords = keywords.filter((keyword) =>
-    text.includes(keyword)
+  const matchedKeywords = KEYWORDS.filter((k) =>
+    text.includes(k)
   );
 
-  const missingKeywords = keywords.filter(
-    (keyword) => !text.includes(keyword)
+  const missingKeywords = KEYWORDS.filter(
+    (k) => !text.includes(k)
   );
 
   const keywordMatchScore = Math.round(
-    (matchedKeywords.length / keywords.length) * 100
+    (matchedKeywords.length / KEYWORDS.length) * 100
   );
 
   const atsScore = Math.min(
@@ -76,9 +53,7 @@ export async function analyzeResume({
 
   return {
     matchScore,
-
     atsScore,
-
     keywordMatchScore,
 
     strengths: matchedKeywords,
@@ -91,57 +66,86 @@ export async function analyzeResume({
 
     suggestions: [
       "Add measurable achievements.",
-      "Include more role-specific keywords.",
-      "Quantify project impact.",
-      "Use ATS-friendly section headings.",
-      "Tailor your resume to each job.",
+      "Tailor your resume to the job description.",
+      "Include more industry keywords.",
+      "Use ATS-friendly formatting.",
+      "Quantify your accomplishments.",
     ],
+  };
+}
 
-    rewrittenResume: `Professional Summary
+export async function rewriteResume({
+  resume,
+  jobTitle,
+}: AnalyzeRequest) {
+  return {
+    rewrittenResume: `PROFESSIONAL SUMMARY
 
-Experienced ${jobTitle} with strong technical skills and a proven record of delivering high-quality software solutions.
+Experienced ${jobTitle} with a strong background in software development and delivering scalable applications.
 
-Skills
+SKILLS
 
-${matchedKeywords.join(", ")}
+React
+TypeScript
+Node.js
+REST APIs
+Git
 
-Experience
+EXPERIENCE
 
-• Built scalable web applications.
+• Developed modern web applications.
 • Collaborated with cross-functional teams.
-• Improved application performance and maintainability.`,
+• Improved application performance.
 
+Original Resume
+
+${resume}`,
+  };
+}
+
+export async function generateCoverLetter({
+  jobTitle,
+}: AnalyzeRequest) {
+  return {
     coverLetter: `Dear Hiring Manager,
 
 I am excited to apply for the ${jobTitle} position.
 
-My experience aligns well with your requirements, and I am confident that my technical background and passion for software development would allow me to contribute immediately.
+My background in software engineering and experience building modern web applications make me a strong candidate for this role.
+
+I enjoy solving complex problems, collaborating with teams, and continuously learning new technologies.
 
 Thank you for your consideration.
 
 Sincerely,
-Candidate`,
 
-    interviewQuestions: [
+Your Name`,
+  };
+}
+
+export async function generateInterviewQuestions({
+  jobTitle,
+}: AnalyzeRequest) {
+  return {
+    questions: [
       {
         category: "Technical",
-        question:
-          "Describe a React project you built.",
+        question: `Describe your experience as a ${jobTitle}.`,
       },
       {
         category: "Technical",
         question:
-          "How do you optimize a React application?",
+          "Explain a challenging project you completed.",
       },
       {
         category: "Behavioral",
         question:
-          "Tell me about a difficult bug you solved.",
+          "Tell me about a conflict within your team.",
       },
       {
         category: "Behavioral",
         question:
-          "Describe a time you worked in a team.",
+          "Describe a project you're most proud of.",
       },
       {
         category: "System Design",

@@ -1,25 +1,33 @@
 import { Router } from "express";
+
 import { generateInterviewQuestions } from "../services/ai.js";
 
 const router = Router();
 
 router.post("/", async (req, res) => {
-  const {
-    resume,
-    jobTitle,
-    jobDescription,
-  } = req.body;
-
-  const questions =
-    await generateInterviewQuestions(
+  try {
+    const {
       resume,
       jobTitle,
-      jobDescription
-    );
+      jobDescription,
+    } = req.body;
 
-  res.json({
-    questions,
-  });
+    const result =
+      await generateInterviewQuestions({
+        resume,
+        jobTitle,
+        jobDescription,
+      });
+
+    res.json(result);
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message:
+        "Failed to generate interview questions.",
+    });
+  }
 });
 
 export default router;
