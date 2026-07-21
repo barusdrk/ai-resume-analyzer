@@ -40,3 +40,9 @@ app.listen(PORT, () => {
     `Server running on http://localhost:${PORT}`
   );
 });
+
+app.get("/api", (_req, res) => {
+  res.json({
+    message: "AI Resume Analyzer API is running",
+  });
+});
