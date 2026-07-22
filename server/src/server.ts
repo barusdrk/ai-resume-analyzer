@@ -7,6 +7,7 @@ import uploadRouter from "./routes/upload.js";
 import rewriteRouter from "./routes/rewrite.js";
 import coverLetterRouter from "./routes/coverLetter.js";
 import interviewRouter from "./routes/interview.js";
+import authRouter from "./routes/auth.js";
 
 dotenv.config();
 
@@ -26,6 +27,14 @@ app.get("/", (_req, res) => {
     message: "AI Resume Analyzer API",
   });
 });
+
+app.use("/api/analyze", analyzeRouter);
+app.use("/api/upload", uploadRouter);
+app.use("/api/rewrite", rewriteRouter);
+app.use("/api/cover-letter", coverLetterRouter);
+app.use("/api/interview", interviewRouter);
+
+app.use("/api/auth", authRouter);
 
 app.use("/api/analyze", analyzeRouter);
 app.use("/api/upload", uploadRouter);
