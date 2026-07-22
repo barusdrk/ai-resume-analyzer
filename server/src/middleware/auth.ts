@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+
 import type {
   Request,
   Response,
@@ -10,37 +11,42 @@ export interface AuthRequest
   userId?: string;
 }
 
-export function auth(
+export default function auth(
   req: AuthRequest,
   res: Response,
   next: NextFunction
 ) {
-  const header =
-    req.headers.authorization;
+  const header = req.headers.authorization;
 
-  if (!header)
+  if (!header) {
     return res
       .status(401)
       .json({
         message: "Unauthorized",
       });
+  }
 
-  const token =
-    header.replace("Bearer ", "");
+  const token = header.replace(
+    "Bearer ",
+    ""
+  );
 
   try {
-    const decoded =
-      jwt.verify(
-        token,
-        process.env.JWT_SECRET!
-      ) as { id: string };
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET!
+    ) as {
+      id: string;
+    };
 
     req.userId = decoded.id;
 
     next();
   } catch {
-    res.status(401).json({
-      message: "Invalid token",
-    });
+    return res
+      .status(401)
+      .json({
+        message: "Invalid token",
+      });
   }
 }
