@@ -3,34 +3,29 @@ import {
   useContext,
   useEffect,
   useState,
-  type ReactNode,
 } from "react";
 
 type Theme = "light" | "dark";
 
-interface ThemeContextValue {
+interface ThemeContextType {
   theme: Theme;
   toggleTheme: () => void;
 }
 
 const ThemeContext =
-  createContext<ThemeContextValue | null>(
-    null
-  );
+  createContext<ThemeContextType | null>(null);
 
 export function ThemeProvider({
   children,
 }: {
-  children: ReactNode;
+  children: React.ReactNode;
 }) {
-  const [theme, setTheme] =
-    useState<Theme>(() => {
-      return (
-        (localStorage.getItem(
-          "theme"
-        ) as Theme) ?? "light"
-      );
-    });
+  const [theme, setTheme] = useState<Theme>(() => {
+    return (
+      (localStorage.getItem("theme") as Theme) ??
+      "light"
+    );
+  });
 
   useEffect(() => {
     document.documentElement.classList.toggle(
@@ -38,17 +33,12 @@ export function ThemeProvider({
       theme === "dark"
     );
 
-    localStorage.setItem(
-      "theme",
-      theme
-    );
+    localStorage.setItem("theme", theme);
   }, [theme]);
 
   function toggleTheme() {
-    setTheme((prev) =>
-      prev === "light"
-        ? "dark"
-        : "light"
+    setTheme((previous) =>
+      previous === "dark" ? "light" : "dark"
     );
   }
 
@@ -65,13 +55,13 @@ export function ThemeProvider({
 }
 
 export function useTheme() {
-  const context =
-    useContext(ThemeContext);
+  const context = useContext(ThemeContext);
 
-  if (!context)
+  if (!context) {
     throw new Error(
-      "useTheme must be used inside ThemeProvider."
+      "useTheme must be used inside ThemeProvider"
     );
+  }
 
   return context;
 }
