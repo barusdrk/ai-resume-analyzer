@@ -308,8 +308,8 @@ This project demonstrates:
 
 ---
 
-# Author
+## Author
 
-Derek Barus
+**Derek Barus**
 
-GitHub: https://github.com/barusdrk/ai-resume-analyzer
+GitHub: [@barusdrk](https://github.com/barusdrk)
