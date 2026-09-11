@@ -161,7 +161,7 @@ client/.env
 ```
 
 ```env
-VITE_API_URL=http://localhost:3001/api
+VITE_API_URL=http://localhost:10000/api
 ```
 
 ---
